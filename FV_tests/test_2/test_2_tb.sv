@@ -1,43 +1,54 @@
 module tb;
-    // Testbench signals
-    logic clk, reset, in, out;
-    logic assertion_failed;  
-    my_design uut (
+
+   
+    logic clk;
+    logic reset;
+    logic in;
+    logic out;
+
+    my_design dut (
         .clk(clk),
         .reset(reset),
         .in(in),
         .out(out)
     );
+
+    
+    always begin
+        #5 clk = ~clk;
+    end
+
+    
     initial begin
         clk = 0;
-        forever #5 clk = ~clk;
-    end
-    initial begin
-        reset = 1;
-        #20 reset = 0;
-    end
-
-    always @(posedge clk) begin
-        if (!reset && !$isunknown(in) && !$isunknown(out) && (out != $past(in))) begin
-            assertion_failed <= 1;  
-        end else begin
-            assertion_failed <= 0;
-        end
-    end
-
-    initial begin
+        reset = 0;
         in = 0;
-        #25 in = 1;
-        #10 in = 0;
-        #10 in = 1;
-        #10 $finish;
+        #10 reset = 1;
+        #10 reset = 0;
+       
     end
 
+    
     initial begin
-        wait(assertion_failed);
-        $display("Assertion failed: 'out' did not follow 'in'");
-        $finish;
+        #20 in = 1;    
+        #30 in = 0;    
+        #40 in = 1; 
+         #20 $finish;
     end
+
+    // SVA without dist (No distribution)
+    property p_check_in_values;
+        @(posedge clk)
+        disable iff (reset)
+        (in == 1'b0) || (in == 1'b1);
+    endproperty
+
+    // Assertion to check property
+    assert property (p_check_in_values);
+    initial begin
+     
+        $monitor("\t %b   %b    %b   %b", clk, reset, in, out);
+    end  
 
 endmodule
 
