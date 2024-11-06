@@ -5,8 +5,11 @@ set design counter
 
 ## Compile & Setup
 vlib work
-vlog -sv ../test_1.sv -work work  ;# Compile the RTL file
-vlog -sv ../test_1_tb.sv -work work ;# Compile the testbench
+vlog -sv ../test_4/test_4.sv -work work  ;# Compile the RTL file
+vlog -sv ../test_4/test_4_tb.sv -work work ;# Compile the testbench
+
+## Load Design
+vsim work.counter_tb ;# Load the top-level testbench design
 
 ## Clock and Reset Definitions
 #force -freeze sim:/counter_tb/clk 0 0, 1 {5 ns} -repeat 10 ns
